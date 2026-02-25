@@ -2,9 +2,7 @@
 
 > A comprehensive platform for pilgrims to search temples and plan their spiritual journeys
 
-[![Live Demo](https://img.shields.io/badge/Demo-Live-success)](https://darshanease.netlify.app/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vercel](https://darshan-ease-9xqrek4ey-sachin-sonis-projects.vercel.app/)
+
 
 ## 📖 About
 
