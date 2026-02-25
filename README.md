@@ -25,7 +25,7 @@ DARSHAN EASE is a web application designed to help devotees discover temples and
 
 ## 🚀 Live Demo
 
-Visit the live application: [darshanease.netlify.app](https://darshanease.netlify.app/)
+Visit the live application: (https://darshan-ease-9xqrek4ey-sachin-sonis-projects.vercel.app/)
 
 ## 💻 Installation & Setup
 
