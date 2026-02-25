@@ -71,7 +71,7 @@ const Footer = () => {
                 </div>
 
                 <div className="border-t border-black/10 pt-8 flex flex-col md:flex-row justify-between items-center text-gray-600 text-sm font-medium">
-                    <p>© 2025 DARSHAN EASE. All rights reserved.</p>
+                    <p>© 2026 DARSHAN EASE. All rights reserved.</p>
                     <div className="flex space-x-6 mt-4 md:mt-0">
                         <a href="#" className="hover:text-black transition-colors">Privacy Policy</a>
                         <a href="#" className="hover:text-black transition-colors">Terms of Service</a>

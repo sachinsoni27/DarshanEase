@@ -1,29 +1,575 @@
-# 🔧 DARSHAN EASE - Troubleshooting & Connection Guide
+# 🔧 DARSHAN EASE - Troubleshooting Guide
 
-## 🚀 Quick Start
+> Common issues, solutions, and FAQ
 
-### 1. Install Dependencies
+---
+
+## 🚨 Quick Troubleshooting
+
+### Application Won't Start
+
+**Problem**: `npm start` fails or hangs
+
+**Solutions**:
+
 ```bash
-cd DarshanEase
+# Clear npm cache
+npm cache clean --force
+
+# Remove node_modules and reinstall
+rm -rf node_modules backend/node_modules frontend/node_modules
 npm run install-all
+
+# Try starting components individually
+npm run backend
+npm run frontend
 ```
 
-### 2. Verify Environment Files
-Ensure these files exist:
-- `backend/.env`
-- `frontend/.env.local`
+### Port Already in Use
 
-### 3. Start MongoDB
+**Problem**: `Error: listen EADDRINUSE: address already in use :::5000`
+
+**Solutions**:
+
 ```bash
-# Windows - If installed locally
-mongod
+# Windows: Find and kill process on port 5000
+netstat -ano | findstr :5000
+taskkill /PID [PID_NUMBER] /F
 
-# Or use MongoDB Atlas - Update MONGO_URI in backend/.env
+# Mac/Linux: Kill process on port 5000
+lsof -ti:5000 | xargs kill -9
+
+# Use different port
+# Edit backend/.env
+PORT=5001
 ```
 
-### 4. Start Both Servers
+### MongoDB Connection Error
+
+**Problem**: `MongooseError: Cannot connect to MongoDB`
+
+**Solutions**:
+
 ```bash
-npm start
+# Check MongoDB URI in backend/.env
+# Correct format: mongodb://localhost:27017/darshanease
+
+# Verify MongoDB is running
+mongod --version
+
+# For Windows, start MongoDB service
+net start MongoDB
+
+# For Mac with Homebrew
+brew services start mongodb-community
+
+# Test connection
+mongo "mongodb://localhost:27017/darshanease"
+```
+
+### CORS Errors
+
+**Problem**: `Access to XMLHttpRequest blocked by CORS policy`
+
+**Solutions**:
+
+1. **Verify URLs**
+   - Frontend: http://localhost:5173
+   - Backend: http://localhost:5000
+
+2. **Check Environment Variables**
+   ```bash
+   # backend/.env
+   FRONTEND_URL=http://localhost:5173
+   
+   # frontend/.env.local
+   VITE_API_BASE_URL=http://localhost:5000/api
+   ```
+
+3. **Clear Browser Cache**
+   - Press F12
+   - Right-click refresh button
+   - Click "Clear cache and hard refresh"
+
+---
+
+## 🎨 Frontend Issues
+
+### Page Doesn't Load or Shows Blank
+
+**Problem**: Frontend URL loads but shows blank page
+
+**Steps to Diagnose**:
+
+1. **Check Browser Console** (F12)
+   - Look for error messages
+   - Check Network tab for failed requests
+
+2. **Check if Vite started**
+   ```bash
+   # Terminal should show:
+   # > vite v... ready in ... ms
+   ```
+
+3. **Clear cache**
+   ```bash
+   # Delete .vite cache
+   rm -rf frontend/.vite
+   ```
+
+4. **Restart frontend**
+   ```bash
+   npm run frontend
+   ```
+
+### Images Not Loading
+
+**Problem**: Images appear as broken links
+
+**Solutions**:
+
+```bash
+# Check public folder
+ls frontend/public/
+
+# Verify image paths in code start with /
+# Correct: src="/images/temple.jpg"
+# Wrong: src="images/temple.jpg"
+
+# For external URLs, verify they're accessible
+# Check CORS settings if loading external images
+```
+
+### Styling Issues
+
+**Problem**: Tailwind CSS not applied or styles missing
+
+**Solutions**:
+
+```bash
+# Rebuild Tailwind
+npm run build:frontend
+
+# Check tailwind.config.js exists
+ls frontend/tailwind.config.js
+
+# Verify content paths in config:
+# content: ["./src/**/*.{js,jsx,ts,tsx}"]
+
+# Clear browser cache (Ctrl+Shift+Delete)
+```
+
+### API Calls Failing
+
+**Problem**: API requests return 404 or connection errors
+
+**Diagnostics**:
+
+```javascript
+// Open browser console and check Network tab
+// Look for requests to http://localhost:5000/api
+
+// Manually test endpoint
+const testAPI = async () => {
+  try {
+    const response = await fetch('http://localhost:5000/api/temples');
+    console.log(await response.json());
+  } catch (error) {
+    console.error('API Error:', error);
+  }
+};
+testAPI();
+```
+
+### Firebase Authentication Not Working
+
+**Problem**: Login/signup fails or shows Firebase errors
+
+**Solutions**:
+
+1. **Check Firebase Configuration**
+   ```bash
+   # Verify frontend/.env.local has all Firebase keys
+   VITE_FIREBASE_API_KEY=...
+   VITE_FIREBASE_AUTH_DOMAIN=...
+   VITE_FIREBASE_PROJECT_ID=...
+   ```
+
+2. **Enable Authentication in Firebase**
+   - Go to Firebase Console
+   - Select Project
+   - Go to Authentication
+   - Click "Get Started"
+   - Enable "Email/Password"
+
+3. **Check Firebase Rules**
+   ```javascript
+   // In Firestore Rules, allow read/write:
+   match /{document=**} {
+     allow read, write: if request.auth != null;
+   }
+   ```
+
+4. **Test Authentication**
+   ```typescript
+   import { auth } from '@/firebase/config';
+   import { signInWithEmailAndPassword } from 'firebase/auth';
+   
+   const testAuth = async () => {
+     try {
+       const user = await signInWithEmailAndPassword(auth, email, password);
+       console.log('Auth works:', user);
+     } catch (error) {
+       console.error('Auth error:', error);
+     }
+   };
+   ```
+
+---
+
+## ⚙️ Backend Issues
+
+### Backend Server Not Starting
+
+**Problem**: `npm run backend` fails immediately
+
+**Solutions**:
+
+```bash
+# Check Node version
+node --version  # Should be >=14.0.0
+
+# Check if port is free
+netstat -ano | findstr :5000
+
+# Verify backend/.env exists and is valid
+cat backend/.env
+
+# Try starting with verbose output
+cd backend && npm start -- --inspect
+```
+
+### API Endpoints Return 404
+
+**Problem**: Calling API endpoints returns `Cannot POST /api/temples`
+
+**Solutions**:
+
+1. **Verify Routes are Configured**
+   ```javascript
+   // backend/server.js should have:
+   app.use('/api/temples', templeRoutes);
+   app.use('/api/food', foodRoutes);
+   app.use('/api/hotels', hotelRoutes);
+   app.use('/api/seed', seedRoutes);
+   ```
+
+2. **Check Routes File**
+   ```bash
+   ls backend/routes/
+   # Should show: foodRoutes.js, hotelRoutes.js, templeRoutes.js, seedRoutes.js
+   ```
+
+3. **Test URLs**
+   ```bash
+   # Base URL should work
+   curl http://localhost:5000/
+   
+   # API endpoints
+   curl http://localhost:5000/api/status
+   curl http://localhost:5000/api/temples
+   ```
+
+### Database Seeding Fails
+
+**Problem**: Seed endpoints return errors or don't populate data
+
+**Solutions**:
+
+```bash
+# Check seed file exists
+ls backend/seed/seedData.js
+
+# Manually run seed
+cd backend && node seed/seedData.js
+
+# Check database directly
+mongo darshanease
+db.temples.count()
+
+# Clear database and reseed
+db.temples.deleteMany({})
+db.temples.insertMany([...])
+```
+
+### Unexpected Errors
+
+**Problem**: Backend returns 500 errors with vague messages
+
+**Solutions**:
+
+1. **Enable Detailed Logging**
+   ```bash
+   # backend/.env
+   NODE_ENV=development
+   LOG_LEVEL=debug
+   ```
+
+2. **Check Backend Logs**
+   ```bash
+   npm run backend 2>&1 | tee backend.log
+   cat backend.log | grep -i error
+   ```
+
+3. **Check Server Console**
+   - Look for stack traces
+   - Identify exact error source
+   - Fix issue
+
+---
+
+## 💾 Database Issues
+
+### Cannot Connect to MongoDB
+
+```bash
+# Check MongoDB service status
+mongod --version
+
+# Verify connection string
+# Should be: mongodb://localhost:27017/darshanease
+# Or: mongodb+srv://user:pass@cluster.mongodb.net/darshanease
+
+# Test connection with mongo shell
+mongo "mongodb://localhost:27017/darshanease"
+
+# Or with newer MongoDB CLI
+mongosh "mongodb://localhost:27017/darshanease"
+```
+
+### Slow Database Queries
+
+```bash
+# Check indexes
+mongo darshanease
+db.temples.getIndexes()
+
+# Create indexes for frequently searched fields
+db.temples.createIndex({ location: 1 })
+db.temples.createIndex({ name: "text" })
+
+# Check query performance
+db.temples.explain("executionStats").find({ location: "Mathura" })
+```
+
+### Data Not Persisting
+
+```bash
+# Verify database name is correct
+# Check MongoDB connection in backend/.env
+
+# Verify data is actually being inserted
+mongo darshanease
+db.temples.find().pretty()
+
+# Check for data in correct collection
+show collections
+```
+
+---
+
+## 🔐 Authentication Issues
+
+### Login Always Fails
+
+**Problem**: Login endpoint returns 401 Unauthorized
+
+**Solutions**:
+
+1. **Check Credentials**
+   - Verify user exists in database
+   - Check password hash algorithm
+
+2. **Check Firebase Setup**
+   ```bash
+   # In Firebase Console:
+   # Authentication > Email/Password > Enabled
+   ```
+
+3. **Check Token Generation**
+   ```bash
+   # Verify JWT secret in backend/.env
+   JWT_SECRET=your_secret_key_here
+   ```
+
+### Session Expires Too Quickly
+
+**Problem**: User logged out unexpectedly
+
+**Solutions**:
+
+1. **Increase Session Timeout**
+   ```bash
+   # backend/.env
+   SESSION_TIMEOUT=86400  # 24 hours in seconds
+   ```
+
+2. **Check Token Expiration**
+   ```bash
+   # Verify TOKEN_EXPIRY in backend
+   TOKEN_EXPIRY=24h
+   ```
+
+---
+
+## 🌐 Network Issues
+
+### Frontend Can't Reach Backend
+
+**Problem**: Network requests fail with connection refused
+
+**Diagnostic Steps**:
+
+```bash
+# 1. Check if backend is running
+curl http://localhost:5000/api/status
+
+# 2. Check CORS settings
+# Response headers should include:
+# Access-Control-Allow-Origin: http://localhost:5173
+
+# 3. Check firewall
+# Windows Firewall should allow Node.js
+
+# 4. Check Network tab in DevTools
+# See actual error message
+```
+
+### Slow API Responses
+
+**Solutions**:
+
+```bash
+# Implement response caching
+// In apiService.ts
+const cache = new Map();
+
+// Optimize database queries
+db.temples.find().limit(50)
+
+// Use pagination
+GET /api/temples?page=1&limit=50
+```
+
+---
+
+## 📱 Deployment Issues
+
+### Vercel Deploy Fails
+
+```bash
+# Check build command
+npm run build:frontend
+
+# Verify Vercel configuration
+cat vercel.json
+
+# Check .env variables in Vercel dashboard
+# Settings > Environment Variables
+
+# Redeploy
+git push origin main
+```
+
+### Backend Deployment Issues
+
+```bash
+# Check Heroku logs
+heroku logs -a app-name --tail
+
+# Verify environment variables
+heroku config -a app-name
+
+# Check Procfile
+cat Procfile
+# Should contain: web: cd backend && npm start
+```
+
+---
+
+## ❓ FAQ
+
+### Q: My changes aren't showing up
+**A**: 
+- Hard refresh browser (Ctrl+Shift+R)
+- Check if frontend recompiled (check terminal output)
+- Try `npm run frontend` again
+
+### Q: Port 3000 already in use
+**A**: Change port in config or kill process on that port
+
+### Q: MongoDB says "authentication failed"
+**A**: Check username/password in MONGO_URI, check whitelist in Atlas
+
+### Q: CORS error on production
+**A**: Update FRONTEND_URL in production .env to match deployed URL
+
+### Q: Error about missing dependencies
+**A**: Run `npm run install-all` to install all deps
+
+### Q: My data disappeared
+**A**: Check if seeding ran since last session, verify DB connection
+
+### Q: App works locally but not deployed
+**A**: Check that all .env variables are set in deployment platform
+
+### Q: Vite build is huge
+**A**: Run `npm run build:frontend` and check bundle size
+
+---
+
+## 🆘 Still Stuck?
+
+1. **Check Documentation**
+   - [GETTING_STARTED.md](GETTING_STARTED.md)
+   - [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
+   - [ARCHITECTURE.md](ARCHITECTURE.md)
+
+2. **Check GitHub Issues**
+   - Search for similar problems
+   - Create new issue with:
+     - Error message
+     - Steps to reproduce
+     - Environment details
+
+3. **Contact Team**
+   - Email: sachinsoniofficial2003@gmail.com
+   - Phone: 9936503035
+   - GitHub: [github.com/sachinsoni27/DarshanEase](https://github.com/sachinsoni27/DarshanEase)
+
+---
+
+## 🐛 Reporting Issues
+
+When creating GitHub issue, include:
+
+```
+### Environment
+- OS: Windows/Mac/Linux
+- Node Version: v14.0.0
+- npm Version: 6.0.0
+- Browser: Chrome 120
+
+### Error Message
+[Full error message and stack trace]
+
+### Steps to Reproduce
+1. First step
+2. Second step
+3. Expected vs actual
+
+### Screenshots
+[Attach relevant screenshots]
 ```
 
 ---

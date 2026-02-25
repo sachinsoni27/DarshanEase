@@ -112,7 +112,7 @@ When you visit the frontend, the footer now displays:
 ║  📞 9936503035                                                 ║
 ║  📧 sachinsoniofficial2003@gmail.com                          ║
 ║                                                                ║
-║  Copyright © 2025 DARSHAN EASE. All rights reserved.          ║
+║  Copyright © 2026 DARSHAN EASE. All rights reserved.          ║
 ║                                                                ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
