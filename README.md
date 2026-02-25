@@ -27,29 +27,11 @@ DARSHAN EASE is a web application designed to help devotees discover temples and
 
 Visit the live application: (https://darshan-ease-9xqrek4ey-sachin-sonis-projects.vercel.app/)
 
-## 💻 Installation & Setup
 
-### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
 
-### Steps
 
-```bash
-# Clone the repository
-git clone https://github.com/Dhananjay0376/DarshanEase.git
 
-# Navigate to project directory
-cd DarshanEase
 
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-```
-
-The application will open at `http://localhost:3000`
 
 ## 📸 Screenshots
 
